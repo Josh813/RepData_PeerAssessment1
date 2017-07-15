@@ -48,7 +48,7 @@ library(ggplot2)
 qplot(daily.steps, bins = 30)
 ```
 
-![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4-1.png)
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png)
 <br><br>
 2.3 Calculate and report the mean and median of the total number of steps taken per day
 
@@ -65,10 +65,13 @@ summary(daily.steps)
 3.1 Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
 ```r
-qplot(interval, steps, data=na.omit(data), geom = "line")
+library(dplyr)
+data <- group_by(data, interval)
+data <- mutate(data, mean.steps = mean(steps, na.rm = TRUE))
+qplot(interval, mean.steps, data=na.omit(data), geom = "line")
 ```
 
-![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png)
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
 <br><br>
 3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
@@ -77,8 +80,11 @@ subset(data, steps == max(steps, na.rm = TRUE))
 ```
 
 ```
-##       steps       date interval
-## 16492   806 2012-11-27      615
+## # A tibble: 1 x 4
+## # Groups:   interval [1]
+##   steps       date interval mean.steps
+##   <int>     <date>    <int>      <dbl>
+## 1   806 2012-11-27      615   63.45283
 ```
 <br><hr><br>
 <b>4. Imputing missing values </b>  
@@ -117,13 +123,16 @@ head(data)
 ```
 
 ```
-##   steps       date interval
-## 1    20 2012-10-01        0
-## 2    20 2012-10-01        5
-## 3    20 2012-10-01       10
-## 4    20 2012-10-01       15
-## 5    20 2012-10-01       20
-## 6    20 2012-10-01       25
+## # A tibble: 6 x 4
+## # Groups:   interval [6]
+##   steps       date interval mean.steps
+##   <dbl>     <date>    <int>      <dbl>
+## 1    20 2012-10-01        0  1.7169811
+## 2    20 2012-10-01        5  0.3396226
+## 3    20 2012-10-01       10  0.1320755
+## 4    20 2012-10-01       15  0.1509434
+## 5    20 2012-10-01       20  0.0754717
+## 6    20 2012-10-01       25  2.0943396
 ```
 <br>
 4.4 Make a histogram of the total number of steps taken each day. Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
@@ -133,7 +142,7 @@ daily.steps1 <- with(data, tapply(steps, date, sum, na.rm = TRUE))
 qplot(daily.steps1, bins = 30)
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png)
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png)
 
 ```r
 summary(daily.steps1)
@@ -156,7 +165,9 @@ data$wday <- factor((weekdays(data$date) %in% c("Saturday","Sunday")), levels=c(
 5.2 Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 
 ```r
-qplot(interval, steps, data=na.omit(data), facets=wday~., geom = "line")
+data <- group_by (data, wday, add = TRUE)
+data <- mutate(data, mean.steps = mean(steps, na.rm = TRUE))
+qplot(interval, mean.steps, data=na.omit(data), facets=wday~., geom = "line")
 ```
 
-![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png)
+![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png)

@@ -34,7 +34,10 @@ summary(daily.steps)
 <b>3. What is the average daily activity pattern?</b>  
 3.1 Make a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 ```{r, fig.height=4}
-qplot(interval, steps, data=na.omit(data), geom = "line")
+library(dplyr)
+data <- group_by(data, interval)
+data <- mutate(data, mean.steps = mean(steps, na.rm = TRUE))
+qplot(interval, mean.steps, data=na.omit(data), geom = "line")
 ```
 <br><br>
 3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
@@ -89,5 +92,7 @@ data$wday <- factor((weekdays(data$date) %in% c("Saturday","Sunday")), levels=c(
 <br>
 5.2 Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 ```{r, fig.height=6}
-qplot(interval, steps, data=na.omit(data), facets=wday~., geom = "line")
+data <- group_by (data, wday, add = TRUE)
+data <- mutate(data, mean.steps = mean(steps, na.rm = TRUE))
+qplot(interval, mean.steps, data=na.omit(data), facets=wday~., geom = "line")
 ```
