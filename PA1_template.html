@@ -270,14 +270,14 @@ qplot(interval, mean.steps, data=na.omit(data), geom = &quot;line&quot;)
 <br><br>
 3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?</p>
 
-<pre><code class="r">subset(data, steps == max(steps, na.rm = TRUE))
+<pre><code class="r">subset(data[,3:4], mean.steps == max(mean.steps, na.rm = TRUE))[1,]
 </code></pre>
 
-<pre><code>## # A tibble: 1 x 4
+<pre><code>## # A tibble: 1 x 2
 ## # Groups:   interval [1]
-##   steps       date interval mean.steps
-##   &lt;int&gt;     &lt;date&gt;    &lt;int&gt;      &lt;dbl&gt;
-## 1   806 2012-11-27      615   63.45283
+##   interval mean.steps
+##      &lt;int&gt;      &lt;dbl&gt;
+## 1      835   206.1698
 </code></pre>
 
 <p><br><hr><br>
