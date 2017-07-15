@@ -76,7 +76,7 @@ qplot(interval, mean.steps, data=na.omit(data), geom = "line")
 3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 ```r
-subset(data[,3:4], mean.steps == max(mean.steps, na.rm = TRUE))[1,]
+subset(data[,3:4], mean.steps == max(mean.steps))[1,]
 ```
 
 ```
@@ -86,6 +86,7 @@ subset(data[,3:4], mean.steps == max(mean.steps, na.rm = TRUE))[1,]
 ##      <int>      <dbl>
 ## 1      835   206.1698
 ```
+The 5-minute interval of 835s.
 <br><hr><br>
 <b>4. Imputing missing values </b>  
 4.1 Calculate and report the total number of missing values in the dataset
@@ -101,22 +102,13 @@ sum(is.na(data$steps))
 4.2 Devise a strategy for filling in all of the missing values in the dataset.
 
 ```r
-replaceNa <- function(x) {
-        if (x<=400) {
-                y <- data$steps[x:(x+800)] }
-        else if (x>17168) {
-                y <- data$steps[(x-800):x] } 
-        else {
-              y <- data$steps[(x-400):(x+400)] }
-        
-        return(trunc(mean(y, na.rm = TRUE)))
-}
+# replace NA values with the mean for that 5-minute interval
+replaceNa <- function(x) { trunc(data$mean.steps[x]) }
 ```
 <br>
 4.3 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 
 ```r
-# replace NA values with average of neighbouring 800 data
 ind <- which(is.na(data$steps))
 data$steps[ind] <- sapply(ind, replaceNa)
 head(data)
@@ -127,18 +119,18 @@ head(data)
 ## # Groups:   interval [6]
 ##   steps       date interval mean.steps
 ##   <dbl>     <date>    <int>      <dbl>
-## 1    20 2012-10-01        0  1.7169811
-## 2    20 2012-10-01        5  0.3396226
-## 3    20 2012-10-01       10  0.1320755
-## 4    20 2012-10-01       15  0.1509434
-## 5    20 2012-10-01       20  0.0754717
-## 6    20 2012-10-01       25  2.0943396
+## 1     1 2012-10-01        0  1.7169811
+## 2     0 2012-10-01        5  0.3396226
+## 3     0 2012-10-01       10  0.1320755
+## 4     0 2012-10-01       15  0.1509434
+## 5     0 2012-10-01       20  0.0754717
+## 6     2 2012-10-01       25  2.0943396
 ```
 <br>
 4.4 Make a histogram of the total number of steps taken each day. Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 
 ```r
-daily.steps1 <- with(data, tapply(steps, date, sum, na.rm = TRUE))
+daily.steps1 <- with(data, tapply(steps, date, sum))
 qplot(daily.steps1, bins = 30)
 ```
 
@@ -150,24 +142,31 @@ summary(daily.steps1)
 
 ```
 ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
-##      41    8476   10600   10476   12883   21194
+##      41    9819   10641   10750   12811   21194
 ```
 
-Both the median and mean of the number of steps taken per day have increased with the imputting of missing data. The total number of steps have increased from 570608 to 639060.
+Both the median and mean of the number of steps taken per day have increased with the imputting of missing data. The total number of steps have increased from 570608 to 655736.
 <br><br><hr><br>
 <b>5. Are there differences in activity patterns between weekdays and weekends? </b>  
 5.1 Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
 ```r
 data$wday <- factor((weekdays(data$date) %in% c("Saturday","Sunday")), levels=c(FALSE, TRUE), labels=c("weekday", "weekend"))
+table(data$wday)
+```
+
+```
+## 
+## weekday weekend 
+##   12960    4608
 ```
 <br>
 5.2 Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 
 ```r
 data <- group_by (data, wday, add = TRUE)
-data <- mutate(data, mean.steps = mean(steps, na.rm = TRUE))
-qplot(interval, mean.steps, data=na.omit(data), facets=wday~., geom = "line")
+data <- mutate(data, mean.steps = mean(steps))
+qplot(interval, mean.steps, data=data, facets=wday~., geom = "line")
 ```
 
 ![plot of chunk unnamed-chunk-13](figure/unnamed-chunk-13-1.png)

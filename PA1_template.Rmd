@@ -42,8 +42,9 @@ qplot(interval, mean.steps, data=na.omit(data), geom = "line")
 <br><br>
 3.2 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 ```{r}
-subset(data[,3:4], mean.steps == max(mean.steps, na.rm = TRUE))[1,]
+subset(data[,3:4], mean.steps == max(mean.steps))[1,]
 ```
+The 5-minute interval of 835s.
 <br><hr><br>
 <b>4. Imputing missing values </b>  
 4.1 Calculate and report the total number of missing values in the dataset
@@ -53,21 +54,12 @@ sum(is.na(data$steps))
 <br>
 4.2 Devise a strategy for filling in all of the missing values in the dataset.
 ```{r}
-replaceNa <- function(x) {
-        if (x<=400) {
-                y <- data$steps[x:(x+800)] }
-        else if (x>17168) {
-                y <- data$steps[(x-800):x] } 
-        else {
-              y <- data$steps[(x-400):(x+400)] }
-        
-        return(trunc(mean(y, na.rm = TRUE)))
-}
+# replace NA values with the mean for that 5-minute interval
+replaceNa <- function(x) { trunc(data$mean.steps[x]) }
 ```
 <br>
 4.3 Create a new dataset that is equal to the original dataset but with the missing data filled in.
 ```{r}
-# replace NA values with average of neighbouring 800 data
 ind <- which(is.na(data$steps))
 data$steps[ind] <- sapply(ind, replaceNa)
 head(data)
@@ -75,7 +67,7 @@ head(data)
 <br>
 4.4 Make a histogram of the total number of steps taken each day. Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
 ```{r, fig.height=4}
-daily.steps1 <- with(data, tapply(steps, date, sum, na.rm = TRUE))
+daily.steps1 <- with(data, tapply(steps, date, sum))
 qplot(daily.steps1, bins = 30)
 summary(daily.steps1)
 ```
@@ -88,11 +80,12 @@ Both the median and mean of the number of steps taken per day have increased wit
 5.1 Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 ```{r}
 data$wday <- factor((weekdays(data$date) %in% c("Saturday","Sunday")), levels=c(FALSE, TRUE), labels=c("weekday", "weekend"))
+table(data$wday)
 ```
 <br>
 5.2 Make a panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis)
 ```{r, fig.height=6}
 data <- group_by (data, wday, add = TRUE)
-data <- mutate(data, mean.steps = mean(steps, na.rm = TRUE))
-qplot(interval, mean.steps, data=na.omit(data), facets=wday~., geom = "line")
+data <- mutate(data, mean.steps = mean(steps))
+qplot(interval, mean.steps, data=data, facets=wday~., geom = "line")
 ```
